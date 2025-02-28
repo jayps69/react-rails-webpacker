@@ -1,16 +1,11 @@
-import React from "react"
-import PropTypes from "prop-types"
-class Root extends React.Component {
-  render () {
-    return (
-      <React.Fragment>
-        Greeting: {this.props.greeting}
-      </React.Fragment>
-    );
-  }
-}
+import PropTypes from "prop-types";
+
+const Root = ({ greeting }) => {
+  return <>Greeting: {greeting}</>;
+};
 
 Root.propTypes = {
   greeting: PropTypes.string
 };
-export default Root
+
+export default Root;
