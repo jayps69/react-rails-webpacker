@@ -29,6 +29,34 @@ class ArticleList extends React.Component {
     }
   };
 
+  handleEdit = (id) => {
+    window.location.href = `/articles/${id}/edit`;
+  };
+
+  handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this article?")) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/articles/${id}`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").getAttribute("content"),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete article.");
+      }
+
+      alert("Article deleted successfully!");
+      this.fetchArticles();
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -45,6 +73,7 @@ class ArticleList extends React.Component {
               <th>ID</th>
               <th>Title</th>
               <th>Content</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -54,11 +83,15 @@ class ArticleList extends React.Component {
                   <td>{article.id}</td>
                   <td>{article.title}</td>
                   <td>{article.content}</td>
+                  <td>
+                    <button onClick={() => this.handleEdit(article.id)}>Edit</button>
+                    <button onClick={() => this.handleDelete(article.id)} style={{ marginLeft: "5px" }}>Delete</button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3">No articles found.</td>
+                <td colSpan="4">No articles found.</td>
               </tr>
             )}
           </tbody>
