@@ -26,6 +26,24 @@ class ArticlesController < ApplicationController
     end
   end
 
+  def update
+    if @article.update(article_params)
+      render json: @article, status: :ok
+    else
+      render json: { errors: @article.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    article = Article.find(params[:id])
+    
+    if article.destroy
+      render json: { message: "Article deleted successfully" }, status: :ok
+    else
+      render json: { errors: article.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+  
   private
 
   def set_article

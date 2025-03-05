@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import NewArticle from "./NewArticle";
 
 class ArticleList extends React.Component {
   constructor(props) {
@@ -7,6 +8,7 @@ class ArticleList extends React.Component {
     this.state = {
       articles: [],
       error: "",
+      editingArticle: null,
     };
   }
 
@@ -29,15 +31,13 @@ class ArticleList extends React.Component {
     }
   };
 
-  handleEdit = (id) => {
-    window.location.href = `/articles/${id}/edit`;
+  handleEdit = (article) => {
+    this.setState({ editingArticle: article });
   };
 
   handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this article?")) {
-      return;
-    }
-    
+    if (!window.confirm("Are you sure you want to delete this article?")) return;
+
     try {
       const response = await fetch(`/articles/${id}`, {
         method: "DELETE",
@@ -51,13 +51,17 @@ class ArticleList extends React.Component {
       }
 
       alert("Article deleted successfully!");
-      this.fetchArticles();
+      this.fetchArticles(); // Refresh the list after deletion
     } catch (error) {
       this.setState({ error: error.message });
     }
   };
 
   render() {
+    if (this.state.editingArticle) {
+      return <NewArticle article={this.state.editingArticle} />;
+    }
+
     return (
       <React.Fragment>
         <h2>Articles List</h2>
@@ -84,8 +88,13 @@ class ArticleList extends React.Component {
                   <td>{article.title}</td>
                   <td>{article.content}</td>
                   <td>
-                    <button onClick={() => this.handleEdit(article.id)}>Edit</button>
-                    <button onClick={() => this.handleDelete(article.id)} style={{ marginLeft: "5px" }}>Delete</button>
+                    <button onClick={() => this.handleEdit(article)}>Edit</button>
+                    <button 
+                      onClick={() => this.handleDelete(article.id)} 
+                      style={{ marginLeft: "5px", color: "red" }}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))

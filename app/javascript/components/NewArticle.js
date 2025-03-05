@@ -5,9 +5,10 @@ class NewArticle extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      title: "",
-      content: "",
-      errors: ""
+      title: props.article?.title || "",
+      content: props.article?.content || "",
+      errors: "",
+      isEditMode: !!props.article, // Check if editing
     };
   }
 
@@ -17,7 +18,8 @@ class NewArticle extends React.Component {
 
   handleSubmit = async (event) => {
     event.preventDefault();
-    const { title, content } = this.state;
+    const { title, content, isEditMode } = this.state;
+    const { article } = this.props;
 
     if (title.trim() === "" || content.trim() === "") {
       this.setState({ errors: "Title and content cannot be empty." });
@@ -25,8 +27,11 @@ class NewArticle extends React.Component {
     }
 
     try {
-      const response = await fetch("/articles", {
-        method: "POST",
+      const url = isEditMode ? `/articles/${article.id}` : "/articles";
+      const method = isEditMode ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
           "X-CSRF-Token": document.querySelector("meta[name='csrf-token']").getAttribute("content"),
@@ -40,8 +45,8 @@ class NewArticle extends React.Component {
         throw new Error(data.errors.join(", "));
       }
 
-      alert("Article created successfully!");
-      this.setState({ title: "", content: "", errors: "" }); // Clear form
+      alert(isEditMode ? "Article updated successfully!" : "Article created successfully!");
+      window.location.href = "/"; // Redirect to home
     } catch (error) {
       this.setState({ errors: error.message });
     }
@@ -54,7 +59,7 @@ class NewArticle extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <h2>Create New Article</h2>
+        <h2>{this.state.isEditMode ? "Edit Article" : "Create New Article"}</h2>
         {this.state.errors && <p style={{ color: "red" }}>{this.state.errors}</p>}
         <form onSubmit={this.handleSubmit}>
           <div>
@@ -74,7 +79,7 @@ class NewArticle extends React.Component {
               onChange={this.handleChange} 
             />
           </div>
-          <button type="submit">Submit</button>
+          <button type="submit">{this.state.isEditMode ? "Update" : "Submit"}</button>
         </form>
         <button onClick={this.handleBack} style={{ marginTop: "10px" }}>Back</button>
       </React.Fragment>
@@ -83,8 +88,7 @@ class NewArticle extends React.Component {
 }
 
 NewArticle.propTypes = {
-  title: PropTypes.string,
-  content: PropTypes.string
+  article: PropTypes.object, // Accept an article object for editing
 };
 
 export default NewArticle;
